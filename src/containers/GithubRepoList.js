@@ -1,6 +1,7 @@
 import { connect } from "react-redux";
 import RepoList from "../components/RepoList";
 import { loadMore } from "../store/repo.slice";
+import { loadStargazerForUser } from "../store/repo.slice";
 
 export default connect(
   state => ({
@@ -10,6 +11,7 @@ export default connect(
     username: state.repos.username
   }),
   dispatch => ({
-    onLoadMore: () => dispatch(loadMore())
+    onLoadMore: () => dispatch(loadMore()),
+    onSeachStargazers: (username, reponame) => dispatch(loadStargazerForUser(username, reponame))
   })
 )(RepoList);

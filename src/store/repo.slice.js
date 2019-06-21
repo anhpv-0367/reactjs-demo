@@ -5,8 +5,10 @@ const slice = createSlice({
   slice: "repo",
   initialState: {
     repos: [],
+    stargazers: [],
     loading: false,
     username: null,
+    reponame: null,
     total: 0,
     page: 0
   },
@@ -28,6 +30,31 @@ const slice = createSlice({
         action.payload.page === 1
           ? [...action.payload.repos]
           : [...state.repos, ...action.payload.repos]
+    }),
+    loadStargazerStart: (state, action) => ({
+      ...state,
+      loading: true,
+      username: action.payload.username,
+      reponame: action.payload.reponame
+    }),
+    loadStargazerSuccess: (state, action) => ({
+      ...state,
+      loading: false,
+      stargazers: {
+        ...state.stargazers,
+        [action.payload.repoId]: {
+          page: action.payload.page,
+          stargazers_count: action.payload.stargazers_count,
+          data:
+            state.stargazers[action.payload.repoId] &&
+            state.stargazers[action.payload.repoId].data !== undefined
+              ? [
+                  ...state.stargazers[action.payload.repoId].data,
+                  ...action.payload.data
+                ]
+              : action.payload.data
+        }
+      }
     })
   }
 });
@@ -64,6 +91,53 @@ export const loadMore = () => async (dispatch, getState) => {
       page: nextPage
     })
   );
+};
+
+export const loadStargazerForUser = (username, reponame) => async dispatch => {
+  dispatch(
+    slice.actions.loadStargazerStart({
+      username,
+      reponame
+    })
+  );
+  const repoInfo = await repoService.getRepoInfo(username, reponame);
+  const data = await repoService.getStargazers(username, reponame, 1);
+  dispatch(
+    slice.actions.loadStargazerSuccess({
+      repoId: repoInfo.id,
+      data: data,
+      stargazers_count: repoInfo.stargazers_count,
+      page: 1
+    })
+  );
+};
+
+export const loadMoreStargazer = (username, reponame) => async (
+  dispatch,
+  getState
+) => {
+  const { stargazers } = getState().repos;
+
+  dispatch(
+    slice.actions.loadStargazerStart({
+      username,
+      reponame
+    })
+  );
+
+  const repoInfo = await repoService.getRepoInfo(username, reponame);
+  const newPage = await repoService.nextPage(stargazers, repoInfo.id);
+  const data = await repoService.getStargazers(username, reponame, newPage);
+
+  if (newPage > 1 && data.length > 0) {
+    dispatch(
+      slice.actions.loadStargazerSuccess({
+        repoId: repoInfo.id,
+        page: newPage,
+        data: data
+      })
+    );
+  }
 };
 
 export default slice;
