@@ -11,3 +11,15 @@
 
 
 ![](https://github.com/anhpv-0367/reactjs-demo/blob/master/2.png)
+
+Các thư viện sử dụng:
+- redux-starter-kit: https://github.com/reduxjs/redux-starter-kit
+- react-redux
+- axios: https://github.com/axios/axios
+
+Một số chú ý:
+ - components: Chỉ thực hiện những phần hiển thị views
+ - containers: Viết các hàm connect(),truyền state, dispatch action đến các component
+ - service: Viết các function GET API, support
+ - store/repo.slice.js: Khai báo cấu trúc state bằng cách createSlice (redux-starter-kit support), viết reducers trong slice này.
+ - ultils/http.js: Nhiệm vụ khai báo baseUrl
